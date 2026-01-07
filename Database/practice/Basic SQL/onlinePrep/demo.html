@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Management ER Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2b2d31;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        #controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #404040;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+        }
+        
+        #controls h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #d4a017;
+        }
+        
+        #controls button {
+            margin: 5px;
+            padding: 8px 15px;
+            border: 1px solid #d4a017;
+            background: #1a1a1a;
+            color: #d4a017;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        #controls button:hover {
+            background: #d4a017;
+            color: #1a1a1a;
+        }
+        
+        #diagram-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #canvas {
+            position: absolute;
+            cursor: grab;
+            transform-origin: 0 0;
+        }
+        
+        #canvas:active {
+            cursor: grabbing;
+        }
+        
+        .table {
+            position: absolute;
+            background: #1a1a1a;
+            border: 1px solid #404040;
+            border-radius: 0px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            min-width: 280px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            z-index: 2;
+        }
+        
+        .table:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+        
+        .table-header {
+            background: #d4a017;
+            color: #1a1a1a;
+            padding: 12px 15px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .table-body {
+            padding: 15px;
+        }
+        
+        .field {
+            padding: 6px 0;
+            font-size: 13px;
+            color: #c0c0c0;
+            border-bottom: 1px solid #303030;
+        }
+        
+        .field:last-child {
+            border-bottom: none;
+        }
+        
+        .field-name {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        .field-type {
+            color: #808080;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        
+        .pk {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        
+        .fk {
+            color: #3b82f6;
+        }
+        
+        #svg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .relation-line {
+            stroke: #a0a0a0;
+            stroke-width: 1.5;
+            fill: none;
+            opacity: 0.8;
+        }
+        
+        .relation-line.dashed {
+            stroke-dasharray: 5, 3;
+            stroke: #a0a0a0;
+        }
+        
+        .relation-arrow {
+            fill: #a0a0a0;
+            opacity: 0.8;
+        }
+        
+        #legend {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 1px solid #404040;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            font-size: 13px;
+            z-index: 1000;
+            color: #e0e0e0;
+        }
+        
+        .legend-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-line {
+            width: 35px;
+            height: 2px;
+            margin-right: 10px;
+        }
+        
+        .legend-line.solid {
+            background: #a0a0a0;
+        }
+        
+        .legend-line.dashed {
+            background: linear-gradient(to right, #a0a0a0 50%, transparent 50%);
+            background-size: 10px 2px;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h2>🎬 Movie Management ER Diagram</h2>
+        <button onclick="resetView()">Reset View</button>
+        <button onclick="zoomIn()">Zoom In (+)</button>
+        <button onclick="zoomOut()">Zoom Out (-)</button>
+    </div>
+    
+    <div id="legend">
+        <div class="legend-item">
+            <div class="legend-line solid"></div>
+            <span>Foreign Key Relationship</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-line dashed"></div>
+            <span>Optional Reference</span>
+        </div>
+        <div class="legend-item">
+            <span style="color: #f59e0b;">●</span>
+            <span style="margin-left: 10px;">Primary Key</span>
+        </div>
+        <div class="legend-item">
+            <span style="color: #3b82f6;">●</span>
+            <span style="margin-left: 10px;">Foreign Key</span>
+        </div>
+    </div>
+    
+    <div id="diagram-container">
+        <svg id="svg-canvas"></svg>
+        <div id="canvas"></div>
+    </div>
+
+    <script>
+        const tables = [
+            {
+                name: 'USERS',
+                x: 150, y: 200,
+                fields: [
+                    { name: 'user_id', type: 'INT', pk: true },
+                    { name: 'username', type: 'VARCHAR(50)' },
+                    { name: 'email', type: 'VARCHAR(100)' },
+                    { name: 'password_hash', type: 'VARCHAR(255)' },
+                    { name: 'display_name', type: 'VARCHAR(100)' },
+                    { name: 'bio', type: 'TEXT' },
+                    { name: 'profile_picture', type: 'VARCHAR(255)' },
+                    { name: 'created_at', type: 'TIMESTAMP' },
+                    { name: 'last_login', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'MOVIES',
+                x: 950, y: 150,
+                fields: [
+                    { name: 'movie_id', type: 'INT', pk: true },
+                    { name: 'title', type: 'VARCHAR(200)' },
+                    { name: 'release_year', type: 'INT' },
+                    { name: 'director', type: 'VARCHAR(100)' },
+                    { name: 'duration_minutes', type: 'INT' },
+                    { name: 'synopsis', type: 'TEXT' },
+                    { name: 'poster_url', type: 'VARCHAR(255)' },
+                    { name: 'trailer_url', type: 'VARCHAR(255)' },
+                    { name: 'imdb_rating', type: 'DECIMAL(3,1)' },
+                    { name: 'created_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'GENRES',
+                x: 1550, y: 150,
+                fields: [
+                    { name: 'genre_id', type: 'INT', pk: true },
+                    { name: 'genre_name', type: 'VARCHAR(50)' },
+                    { name: 'description', type: 'TEXT' }
+                ]
+            },
+            {
+                name: 'MOVIE_GENRES',
+                x: 1550, y: 420,
+                fields: [
+                    { name: 'movie_id', type: 'INT', pk: true, fk: true },
+                    { name: 'genre_id', type: 'INT', pk: true, fk: true },
+                    { name: 'created_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'WATCHED_MOVIES',
+                x: 550, y: 650,
+                fields: [
+                    { name: 'watch_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'movie_id', type: 'INT', fk: true },
+                    { name: 'watch_date', type: 'DATE' },
+                    { name: 'personal_notes', type: 'TEXT' },
+                    { name: 'rewatch', type: 'BOOLEAN' },
+                    { name: 'created_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'WATCHLIST',
+                x: 1250, y: 650,
+                fields: [
+                    { name: 'watchlist_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'movie_id', type: 'INT', fk: true },
+                    { name: 'priority', type: 'INT' },
+                    { name: 'added_date', type: 'TIMESTAMP' },
+                    { name: 'notes', type: 'TEXT' }
+                ]
+            },
+            {
+                name: 'REVIEWS',
+                x: 150, y: 1100,
+                fields: [
+                    { name: 'review_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'movie_id', type: 'INT', fk: true },
+                    { name: 'rating', type: 'DECIMAL(2,1)' },
+                    { name: 'review_text', type: 'TEXT' },
+                    { name: 'likes_count', type: 'INT' },
+                    { name: 'created_at', type: 'TIMESTAMP' },
+                    { name: 'updated_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'RATINGS',
+                x: 950, y: 1100,
+                fields: [
+                    { name: 'rating_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'movie_id', type: 'INT', fk: true },
+                    { name: 'rating_value', type: 'DECIMAL(2,1)' },
+                    { name: 'created_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'FOLLOWERS',
+                x: 150, y: 650,
+                fields: [
+                    { name: 'follower_id', type: 'INT', fk: true },
+                    { name: 'following_id', type: 'INT', fk: true },
+                    { name: 'followed_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'AI_RECOMMENDATIONS',
+                x: 1550, y: 800,
+                fields: [
+                    { name: 'recommendation_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'movie_id', type: 'INT', fk: true },
+                    { name: 'mood', type: 'VARCHAR(50)' },
+                    { name: 'confidence_score', type: 'DECIMAL(3,2)' },
+                    { name: 'reason', type: 'TEXT' },
+                    { name: 'created_at', type: 'TIMESTAMP' }
+                ]
+            },
+            {
+                name: 'SOCIAL_MEDIA_SHARES',
+                x: 550, y: 1450,
+                fields: [
+                    { name: 'share_id', type: 'INT', pk: true },
+                    { name: 'user_id', type: 'INT', fk: true },
+                    { name: 'review_id', type: 'INT', fk: true },
+                    { name: 'platform', type: 'VARCHAR(50)' },
+                    { name: 'share_url', type: 'VARCHAR(255)' },
+                    { name: 'shared_at', type: 'TIMESTAMP' }
+                ]
+            }
+        ];
+
+        const relations = [
+            { from: 'USERS', to: 'FOLLOWERS', fromSide: 'left', toSide: 'top', style: 'solid' },
+            { from: 'USERS', to: 'WATCHED_MOVIES', fromSide: 'bottom', toSide: 'left', style: 'solid' },
+            { from: 'MOVIES', to: 'WATCHED_MOVIES', fromSide: 'left', toSide: 'top', style: 'solid' },
+            { from: 'USERS', to: 'WATCHLIST', fromSide: 'right', toSide: 'left', style: 'solid' },
+            { from: 'MOVIES', to: 'WATCHLIST', fromSide: 'bottom', toSide: 'top', style: 'solid' },
+            { from: 'USERS', to: 'REVIEWS', fromSide: 'bottom', toSide: 'top', style: 'solid' },
+            { from: 'MOVIES', to: 'REVIEWS', fromSide: 'left', toSide: 'right', style: 'solid' },
+            { from: 'USERS', to: 'RATINGS', fromSide: 'right', toSide: 'left', style: 'solid' },
+            { from: 'MOVIES', to: 'RATINGS', fromSide: 'bottom', toSide: 'top', style: 'solid' },
+            { from: 'USERS', to: 'AI_RECOMMENDATIONS', fromSide: 'right', toSide: 'left', style: 'solid' },
+            { from: 'MOVIES', to: 'AI_RECOMMENDATIONS', fromSide: 'right', toSide: 'top', style: 'dashed' },
+            { from: 'USERS', to: 'SOCIAL_MEDIA_SHARES', fromSide: 'bottom', toSide: 'left', style: 'solid' },
+            { from: 'REVIEWS', to: 'SOCIAL_MEDIA_SHARES', fromSide: 'right', toSide: 'top', style: 'dashed' },
+            { from: 'MOVIES', to: 'MOVIE_GENRES', fromSide: 'right', toSide: 'left', style: 'solid' },
+            { from: 'GENRES', to: 'MOVIE_GENRES', fromSide: 'bottom', toSide: 'top', style: 'solid' }
+        ];
+
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        const canvas = document.getElementById('canvas');
+        const svgCanvas = document.getElementById('svg-canvas');
+        const container = document.getElementById('diagram-container');
+
+        function getConnectionPoint(table, side) {
+            const rect = table.element.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            let x, y;
+            
+            switch(side) {
+                case 'top':
+                    x = rect.left + rect.width / 2 - containerRect.left;
+                    y = rect.top - containerRect.top;
+                    break;
+                case 'bottom':
+                    x = rect.left + rect.width / 2 - containerRect.left;
+                    y = rect.bottom - containerRect.top;
+                    break;
+                case 'left':
+                    x = rect.left - containerRect.left;
+                    y = rect.top + rect.height / 2 - containerRect.top;
+                    break;
+                case 'right':
+                    x = rect.right - containerRect.left;
+                    y = rect.top + rect.height / 2 - containerRect.top;
+                    break;
+            }
+            
+            return { x, y };
+        }
+
+        function createTable(table) {
+            const div = document.createElement('div');
+            div.className = 'table';
+            div.style.left = table.x + 'px';
+            div.style.top = table.y + 'px';
+            
+            const header = document.createElement('div');
+            header.className = 'table-header';
+            header.textContent = table.name;
+            div.appendChild(header);
+            
+            const body = document.createElement('div');
+            body.className = 'table-body';
+            
+            table.fields.forEach(field => {
+                const fieldDiv = document.createElement('div');
+                fieldDiv.className = 'field';
+                
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'field-name';
+                if (field.pk) nameSpan.classList.add('pk');
+                if (field.fk) nameSpan.classList.add('fk');
+                nameSpan.textContent = field.name;
+                
+                const typeSpan = document.createElement('span');
+                typeSpan.className = 'field-type';
+                typeSpan.textContent = field.type;
+                
+                fieldDiv.appendChild(nameSpan);
+                fieldDiv.appendChild(typeSpan);
+                body.appendChild(fieldDiv);
+            });
+            
+            div.appendChild(body);
+            canvas.appendChild(div);
+            
+            table.element = div;
+        }
+
+        function drawRelations() {
+            const containerRect = container.getBoundingClientRect();
+            svgCanvas.setAttribute('width', containerRect.width);
+            svgCanvas.setAttribute('height', containerRect.height);
+            svgCanvas.innerHTML = '';
+            
+            const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+            
+            const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+            marker.setAttribute('id', 'arrowhead');
+            marker.setAttribute('markerWidth', '6');
+            marker.setAttribute('markerHeight', '6');
+            marker.setAttribute('refX', '5');
+            marker.setAttribute('refY', '3');
+            marker.setAttribute('orient', 'auto');
+            
+            const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            polygon.setAttribute('points', '0 0, 6 3, 0 6');
+            polygon.setAttribute('class', 'relation-arrow');
+            marker.appendChild(polygon);
+            defs.appendChild(marker);
+            svgCanvas.appendChild(defs);
+            
+            relations.forEach(rel => {
+                const fromTable = tables.find(t => t.name === rel.from);
+                const toTable = tables.find(t => t.name === rel.to);
+                
+                if (fromTable && toTable && fromTable.element && toTable.element) {
+                    const from = getConnectionPoint(fromTable, rel.fromSide);
+                    const to = getConnectionPoint(toTable, rel.toSide);
+                    
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    
+                    // Simple direct line with slight curve
+                    const dx = to.x - from.x;
+                    const dy = to.y - from.y;
+                    const d = `M ${from.x} ${from.y} Q ${from.x + dx/2} ${from.y + dy/2} ${to.x} ${to.y}`;
+                    
+                    path.setAttribute('d', d);
+                    path.setAttribute('class', `relation-line ${rel.style}`);
+                    path.setAttribute('marker-end', 'url(#arrowhead)');
+                    
+                    svgCanvas.appendChild(path);
+                }
+            });
+        }
+
+        function updateTransform() {
+            canvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            drawRelations();
+        }
+
+        function render() {
+            canvas.innerHTML = '';
+            tables.forEach(createTable);
+            setTimeout(() => {
+                updateTransform();
+            }, 10);
+        }
+
+        function resetView() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        function zoomIn() {
+            scale *= 1.2;
+            updateTransform();
+        }
+
+        function zoomOut() {
+            scale /= 1.2;
+            updateTransform();
+        }
+
+        container.addEventListener('mousedown', (e) => {
+            if (e.target === container || e.target === svgCanvas) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+            }
+        });
+
+        container.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        container.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        container.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            scale *= delta;
+            updateTransform();
+        });
+
+        window.addEventListener('resize', () => {
+            drawRelations();
+        });
+
+        render();
+    </script>
+</body>
+</html>

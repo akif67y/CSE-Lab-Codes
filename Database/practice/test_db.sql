@@ -1,0 +1,2 @@
+SELECT country_name
+from countries
