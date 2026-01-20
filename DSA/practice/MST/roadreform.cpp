@@ -98,8 +98,8 @@ public:
 
 void kruskal()
 {
-    ll n, m;
-    cin >> n >> m;
+    ll n, m, k;
+    cin >> n >> m >> k;
     vector<Edge> edges;
     for (ll i = 0; i < m; i++)
     {
@@ -127,22 +127,38 @@ void kruskal()
             union_sets(e.from, e.to);
         }
     }
-
-    if (edgecount != n - 1)
-    {
-        cout << "No MST!" << endl;
-    }
-    else
-    {
-        cout << "Total weights: " << cost << endl;
-        for (auto &var : result)
-        {
-            cout << var.from << " " << var.to << "\n";
+    
+    ll cutoff = 0;
+    ll maxi= -INF;
+    for(int i = 0; i < result.size(); i++){
+        maxi = max(maxi, result[i].w);
+        if(result[i].w > k){
+            cutoff += result[i].w - k;
         }
     }
+    if(cutoff != 0){
+        cout << cutoff <<"\n";
+        return;
+    }
+    ll close = INF;
+    for(int i = 0; i < edges.size(); i++){
+        if(close > abs(edges[i].w - k)){
+            close = abs(edges[i].w - k);
+        }
+    }
+    
+    cout << close <<"\n";
+    
+
+   
 }
 
 int main()
 {
-    kruskal();
+    ll t;
+    cin >> t;
+    while(t--){
+        kruskal();
+    }
+    
 }

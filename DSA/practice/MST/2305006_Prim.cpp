@@ -4,13 +4,13 @@
 #include <utility>
 
 using namespace std;
-
-const int INF = 1e9;
+#define ll long long
+const ll INF = 1e9;
 
 class Edge {
 public:
-    int w, to, from;
-    Edge(int weight, int target, int source) {
+    ll w, to, from;
+    Edge(ll weight, ll target, ll source) {
         w = weight;
         to = target;
         from = source;
@@ -22,24 +22,24 @@ public:
 };
 
 void prim() {
-    int n, m;
+    ll n, m;
     cin >> n >> m;
 
-    vector<vector<pair<int, int>>> adj(n + 1);
+    vector<vector<pair<ll, ll>>> adj(n + 1);
 
-    for (int i = 0; i < m; i++) {
-        int u, v, w;
+    for (ll i = 0; i < m; i++) {
+        ll u, v, w;
         cin >> u >> v >> w;
         
         adj[u].push_back({w, v});
         adj[v].push_back({w, u});
     }
 
-    int root;
+    ll root;
     cin >> root;
 
-    int total_weight = 0;
-    vector<int> min_w(n + 1, INF);
+    ll total_weight = 0;
+    vector<ll> min_w(n + 1, INF);
     vector<bool> selected(n + 1, false);
     vector<Edge> MST;
 
@@ -48,15 +48,15 @@ void prim() {
     priority_queue<Edge, vector<Edge>, greater<Edge>> pq;
     pq.push({0, root, -1});
 
-    int edges_count = 0;
+    ll edges_count = 0;
 
     while (!pq.empty()) {
         Edge top = pq.top();
         pq.pop();
 
-        int w = top.w;
-        int u = top.to;
-        int parent = top.from;
+        ll w = top.w;
+        ll u = top.to;
+        ll parent = top.from;
 
         // If node u is already included in MST, skip it
         if (selected[u]) {
@@ -72,8 +72,8 @@ void prim() {
         }
 
         for (auto& edge : adj[u]) {
-            int weight = edge.first;
-            int v = edge.second;
+            ll weight = edge.first;
+            ll v = edge.second;
             
             if (!selected[v] && weight < min_w[v]) {
                 min_w[v] = weight;
@@ -94,7 +94,7 @@ void prim() {
     }
 }
 
-int main() {
+ll main() {
     prim();
     return 0;
 }

@@ -12,7 +12,7 @@ using namespace std;
   cout.tie(NULL)
 #define MOD 1000000007
 #define MOD1 998244353
-#define INF 1e18
+#define INF 1e9
 #define nline "\n"
 #define pb push_back
 #define ppb pop_back
@@ -48,6 +48,7 @@ void _print(double t) { cerr << t; }
 void _print(ull t) { cerr << t; }
 
 #define M 100000007 // might need to change this;
+
 
 
 template <class T, class V> void _print(pair<T, V> p);
@@ -96,54 +97,83 @@ template <class T, class V> void _print(map<T, V> v) {
 }
 // might need to change this;
 
-
+long long binarymulti(ll a, ll b);
+long long binaryexp(ll a, ll b) {
+  ll ans = 1;
+  while (b > 0) {
+    if (b & 1) {
+      ans = binarymulti(ans, a) % M;
+    }
+    a = binarymulti(a, a) % M;
+    b >>= 1;
+  }
+  return ans;
+}
+long long binarymulti(ll a, ll b) {
+  ll ans = 0;
+  while (b > 0) {
+    if (b & 1) {
+      ans = (ans + a) % M;
+    }
+    a = (a + a) % M; // prevents overflow of multiplying a and b, asuming 2a
+                     // doesn't cause overflow
+    b >>= 1;
+  }
+  return ans;
+}
 
 
  // adjacency matrix of graph
 //const int INF = 1000000000; // weight INF means there is no edge
 
 struct Edge {
-    ll w = INF, to = -1;
+    int w = INF, to = -1;
 };
 
 void prim() {
-  ll n;
+  int n;
   cin >> n;
-  vector<vector<ll>> adj(n+1, vector<ll>(n+1,INF));
+  vector<int>vertices(n,-1);
   for(int i = 0; i < n; i++){
-    for(int j = 0; j < n; j++){
-      cin >> adj[i][j];
+    cin >> vertices[i];
+  }
+
+  vector<vector<int>> adj(n, vector<int>(n,INT_MAX));
+  for(int i = 0; i < n; i++){
+    adj[i][i] = 0;
+    for(int j = i+1; j < n; j++){
+        adj[i][j] = adj[j][i] = -(vertices[i] ^ vertices[j]);
     }
   }
-    ll total_weight = 0;
+    int total_weight = 0;
     vector<bool> selected(n, false);
     vector<Edge> min_e(n);
     min_e[0].w = 0;
 
-    for (ll i=0; i<n; ++i) {
-        ll v = -1;
-        for (ll j = 0; j < n; ++j) {
+    for (int i=0; i<n; ++i) {
+        int v = -1;
+        for (int j = 0; j < n; ++j) {
             if (!selected[j] && (v == -1 || min_e[j].w < min_e[v].w))
                 v = j;
         }
 
         if (min_e[v].w == INF) {
-            cout << "NO!" << endl;
-            return;
+            cout << "No MST!" << endl;
+            exit(0);
         }
 
         selected[v] = true;
         total_weight += min_e[v].w;
-        if (min_e[v].to != -1)
-            cout << v << " " << min_e[v].to << endl;
+        // if (min_e[v].to != -1)
+        //     cout << v << " " << min_e[v].to << min_e[v].w <<endl;
 
-        for (ll to = 0; to < n; ++to) {
+        for (int to = 0; to < n; ++to) {
             if (adj[v][to] < min_e[to].w)
                 min_e[to] = {adj[v][to], v};
         }
     }
 
-    cout << total_weight << endl;
+    cout << -total_weight << endl;
 }
 void solve() {
   

@@ -47,8 +47,9 @@ void _print(lld t) { cerr << t; }
 void _print(double t) { cerr << t; }
 void _print(ull t) { cerr << t; }
 
-vector<ll>parent(((ll)(2 * 1e5) + 1));
-vector<ll>sizet(((ll)(2 * 1e5) + 1));
+vector<ll>parent(((int)(2 * 1e5) + 1));
+vector<ll>sizet(((int)(2 * 1e5) + 1));
+
 
 void make_set(ll v)
 {
@@ -79,12 +80,22 @@ void union_sets(ll a, ll b)
 class Edge
 {
 public:
-    ll w, to, from;
+    ll w, to, from, status = false, idx;
+    Edge(){
+
+    }
     Edge(ll weight, ll target, ll source)
     {
         w = weight;
         to = target;
         from = source;
+    }
+    Edge(ll weight, ll target, ll source,ll idx2)
+    {
+        w = weight;
+        to = target;
+        from = source;
+        idx = idx2;
     }
     bool operator>(const Edge &other) const
     {
@@ -98,48 +109,59 @@ public:
 
 void kruskal()
 {
-    ll n, m;
+    int n, m;
     cin >> n >> m;
-    vector<Edge> edges;
-    for (ll i = 0; i < m; i++)
+    vector<Edge> edges(m);
+    for (int i = 0; i < m; i++)
     {
-        ll u, v, w;
-        cin >> u >> v >> w;
-        edges.push_back({w, v, u});
+        int u, v, wi;
+        cin >> u >> v >> wi;
+        edges[i]= Edge(wi,u,v,i);
         //  edges.push_back({w,u,v});
     }
+     vector<Edge>cpyedges(edges);
 
-    ll cost = 0;
+    int cost = 0;
     vector<Edge> result;
-    for (ll i = 0; i <= n; i++)
+    for (int i = 0; i <= n; i++)
         make_set(i);
-    ll edgecount = 0;
+    int edgecount = 0;
 
     sort(edges.begin(), edges.end());
-
-    for (Edge e : edges)
+    int cur = edges[0].w;
+    for (int i = 0; i < edges.size();)
     {
-        if (find_set(e.from) != find_set(e.to))
-        {
-            edgecount++;
-            cost += e.w;
-            result.push_back(e);
-            union_sets(e.from, e.to);
+        int j = i;
+        while( j < edges.size() && edges[j].w == cur){
+             if (find_set(edges[j].from) != find_set(edges[j].to)){
+                edges[j].status = true;
+                cpyedges[edges[j].idx].status = true;
+             }
+            j++;
+        }
+        j = i;
+         while( j < edges.size() && edges[j].w == cur){
+             if (find_set(edges[j].from) != find_set(edges[j].to)){
+                cost += edges[i].w;
+                union_sets(edges[j].from, edges[j].to);
+             }
+            j++;
+        }
+        i = j;
+       if(i < edges.size()) cur = edges[i].w;
+    }
+    for(int i = 0; i < cpyedges.size(); i++){
+        if(cpyedges[i].status){
+            cout <<"YES\n";
+        }
+        else{
+            cout <<"NO\n";
         }
     }
+   
+    
 
-    if (edgecount != n - 1)
-    {
-        cout << "No MST!" << endl;
-    }
-    else
-    {
-        cout << "Total weights: " << cost << endl;
-        for (auto &var : result)
-        {
-            cout << var.from << " " << var.to << "\n";
-        }
-    }
+
 }
 
 int main()

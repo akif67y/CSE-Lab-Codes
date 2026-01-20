@@ -47,10 +47,10 @@ void _print(lld t) { cerr << t; }
 void _print(double t) { cerr << t; }
 void _print(ull t) { cerr << t; }
 
-vector<ll>parent(((ll)(2 * 1e5) + 1));
-vector<ll>sizet(((ll)(2 * 1e5) + 1));
+vector<ll>parent(((int)(2 * 1e5) + 1));
+vector<ll>sizet(((int)(2 * 1e5) + 1));
 
-void make_set(ll v)
+void make_set(int v)
 {
     parent[v] = v;
     sizet[v] = 1;
@@ -98,24 +98,38 @@ public:
 
 void kruskal()
 {
-    ll n, m;
-    cin >> n >> m;
-    vector<Edge> edges;
-    for (ll i = 0; i < m; i++)
-    {
-        ll u, v, w;
-        cin >> u >> v >> w;
-        edges.push_back({w, v, u});
-        //  edges.push_back({w,u,v});
+    ll n;
+    cin >> n ;
+    string s;
+    cin >> s;
+    vector<ll>coordinates(n);
+    for(ll i = 0; i < n; i++){
+        cin >> coordinates[i];
     }
-
+     vector<Edge> edges;
+    for(ll i = 0; i < n-1; i++){
+        edges.pb({coordinates[i+1] - coordinates[i], i+1, i});
+    }
+    for(ll i = 0; i < n; i++){
+        if(s[i] == '1'){
+            edges.pb({0,i,n});
+        }
+    }
+    
     ll cost = 0;
-    vector<Edge> result;
+   // vector<Edge> result;
     for (ll i = 0; i <= n; i++)
         make_set(i);
     ll edgecount = 0;
-
+    // for(auto &var : edges){
+    //     cout << var.from <<" "<< var.to<<"\n";
+    // }
+    
     sort(edges.begin(), edges.end());
+    // for(auto &var : edges){
+    //     cout << var.from <<" "<< var.to<<"\n";
+    // }
+    
 
     for (Edge e : edges)
     {
@@ -123,26 +137,19 @@ void kruskal()
         {
             edgecount++;
             cost += e.w;
-            result.push_back(e);
+          //  result.push_back(e);
             union_sets(e.from, e.to);
         }
     }
+    cout << cost <<"\n";
 
-    if (edgecount != n - 1)
-    {
-        cout << "No MST!" << endl;
-    }
-    else
-    {
-        cout << "Total weights: " << cost << endl;
-        for (auto &var : result)
-        {
-            cout << var.from << " " << var.to << "\n";
-        }
-    }
 }
 
 int main()
 {
-    kruskal();
+    ll t;
+    cin >> t;
+    while(t--){
+        kruskal();
+    }
 }

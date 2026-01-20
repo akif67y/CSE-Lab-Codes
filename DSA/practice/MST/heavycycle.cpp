@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
-
+ 
 using namespace std;
-
+ 
 // #define unordered_map<long long, int, custom_hash> ulli
 #define For(a, b) for (int i = a; i < (b); i++)
 #define vi vector<int>
@@ -23,13 +23,13 @@ using namespace std;
 #define set_bits __builtin_popcountll
 #define sz(x) ((int)(x).size())
 #define all(x) (x).begin(), (x).end()
-
+ 
 typedef long long ll;
 typedef unsigned long long ull;
 typedef long double lld;
 // typedef tree<pair<int, int>, null_type, less<pair<int, int>>, rb_tree_tag,
 // tree_order_statistics_node_update > pbds; // find_by_order, order_of_key
-
+ 
 #ifndef ONLINE_JUDGE
 #define debug(x)       \
     cerr << #x << " "; \
@@ -38,7 +38,7 @@ typedef long double lld;
 #else
 #define debug(x)
 #endif
-
+ 
 void _print(ll t) { cerr << t; }
 void _print(int t) { cerr << t; }
 void _print(string t) { cerr << t; }
@@ -46,23 +46,24 @@ void _print(char t) { cerr << t; }
 void _print(lld t) { cerr << t; }
 void _print(double t) { cerr << t; }
 void _print(ull t) { cerr << t; }
-
-vector<ll>parent(((ll)(2 * 1e5) + 1));
-vector<ll>sizet(((ll)(2 * 1e5) + 1));
-
+ 
+vector<ll>parent(((int)(2 * 1e5) + 1));
+vector<ll>sizet(((int)(2 * 1e5) + 1));
+ 
+ 
 void make_set(ll v)
 {
     parent[v] = v;
     sizet[v] = 1;
 }
-
+ 
 ll find_set(ll v)
 {
     if (v == parent[v])
         return v;
     return parent[v] = find_set(parent[v]);
 }
-
+ 
 void union_sets(ll a, ll b)
 {
     a = find_set(a);
@@ -75,16 +76,26 @@ void union_sets(ll a, ll b)
         sizet[a] += sizet[b];
     }
 }
-
+ 
 class Edge
 {
 public:
-    ll w, to, from;
+    ll w, to, from, status = false, idx;
+    Edge(){
+ 
+    }
     Edge(ll weight, ll target, ll source)
     {
         w = weight;
         to = target;
         from = source;
+    }
+    Edge(ll weight, ll target, ll source,ll idx2)
+    {
+        w = weight;
+        to = target;
+        from = source;
+        idx = idx2;
     }
     bool operator>(const Edge &other) const
     {
@@ -95,54 +106,84 @@ public:
         return w < other.w;
     }
 };
-
-void kruskal()
+ 
+void kruskal(ll n, ll m)
 {
-    ll n, m;
-    cin >> n >> m;
-    vector<Edge> edges;
+
+    vector<Edge> edges(m);
     for (ll i = 0; i < m; i++)
     {
-        ll u, v, w;
-        cin >> u >> v >> w;
-        edges.push_back({w, v, u});
+        ll u, v, wi;
+        cin >> u >> v >> wi;
+        edges[i]= Edge(wi,u,v,i);
         //  edges.push_back({w,u,v});
     }
-
+     vector<Edge>cpyedges(edges);
+ 
     ll cost = 0;
     vector<Edge> result;
     for (ll i = 0; i <= n; i++)
         make_set(i);
     ll edgecount = 0;
-
+ 
     sort(edges.begin(), edges.end());
-
-    for (Edge e : edges)
+    ll cur = edges[0].w;
+    for (ll i = 0; i < edges.size();)
     {
-        if (find_set(e.from) != find_set(e.to))
-        {
-            edgecount++;
-            cost += e.w;
-            result.push_back(e);
-            union_sets(e.from, e.to);
+        ll j = i;
+        while( j < edges.size() && edges[j].w == cur){
+             if (find_set(edges[j].from) != find_set(edges[j].to)){
+                edges[j].status = true;
+                cpyedges[edges[j].idx].status = true;
+             }
+            j++;
+        }
+        j = i;
+         while( j < edges.size() && edges[j].w == cur){
+             if (find_set(edges[j].from) != find_set(edges[j].to)){
+                cost += edges[i].w;
+                union_sets(edges[j].from, edges[j].to);
+             }
+            j++;
+        }
+        i = j;
+       if(i < edges.size()) cur = edges[i].w;
+    }
+    vector<ll>answer;
+    for(ll i = 0; i < cpyedges.size(); i++){
+        if(cpyedges[i].status){
+            
+        }
+        else{
+            answer.pb(cpyedges[i].w);
         }
     }
-
-    if (edgecount != n - 1)
-    {
-        cout << "No MST!" << endl;
+    if(answer.size() == 0){
+        cout <<"forest\n";
     }
-    else
-    {
-        cout << "Total weights: " << cost << endl;
-        for (auto &var : result)
-        {
-            cout << var.from << " " << var.to << "\n";
+    else{
+        sort(all(answer));
+        for(auto &var : answer){
+            cout << var <<" ";
         }
+        cout <<"\n";
+
     }
+    
+ 
+ 
 }
-
+ 
 int main()
-{
-    kruskal();
+{  
+    ll n,m;
+    
+     while(true){
+        cin >> n >> m;
+        if(n == 0 && m == 0){
+            break;
+        }
+    kruskal(n,m);
+}
+    
 }

@@ -49,6 +49,7 @@ void _print(ull t) { cerr << t; }
 
 vector<ll>parent(((ll)(2 * 1e5) + 1));
 vector<ll>sizet(((ll)(2 * 1e5) + 1));
+ll ccount = 0;
 
 void make_set(ll v)
 {
@@ -73,18 +74,29 @@ void union_sets(ll a, ll b)
             swap(a, b);
         parent[b] = a;
         sizet[a] += sizet[b];
+        ccount--;
     }
 }
+class Nodes{
+    public : 
+    double x,  y;
+    Nodes(double xx, double yy){
+        x = xx;
+        y = yy;
+    }
+};
 
 class Edge
 {
 public:
-    ll w, to, from;
-    Edge(ll weight, ll target, ll source)
+    double w;
+    ll from, to, type;
+    Edge(double weight, ll target, ll source , ll tp)
     {
         w = weight;
         to = target;
         from = source;
+        type = tp;
     }
     bool operator>(const Edge &other) const
     {
@@ -98,51 +110,67 @@ public:
 
 void kruskal()
 {
-    ll n, m;
-    cin >> n >> m;
-    vector<Edge> edges;
-    for (ll i = 0; i < m; i++)
+    ll n, r, w, u, v;
+    cin >> n >> r >> w >> u >> v;
+    vector<Nodes> nodes;
+    for (ll i = 0; i < n; i++)
     {
-        ll u, v, w;
-        cin >> u >> v >> w;
-        edges.push_back({w, v, u});
+        double u, v, w;
+        cin >> u >> v ;
+        nodes.push_back({u, v});
         //  edges.push_back({w,u,v});
     }
+     vector<Edge>edges;
+    for(int i = 0; i < n; i++){
+        for(int j = i+1; j < n; j++){
+            double distance = sqrt( (nodes[i].x - nodes[j].x) *(nodes[i].x - nodes[j].x) + (nodes[i].y - nodes[j].y) * (nodes[i].y - nodes[j].y) );
+            if(distance <= r){
+               edges.pb({distance * u, j, i,0}); 
+            }
+            else  edges.pb({distance * v, j, i, 1});
+        }
+    }
 
-    ll cost = 0;
+    double cost1 = 0;
+    double cost2 = 0;
     vector<Edge> result;
-    for (ll i = 0; i <= n; i++)
+    for (ll i = 0; i < n; i++){
         make_set(i);
+        ccount = n;
+    }
+        
     ll edgecount = 0;
 
     sort(edges.begin(), edges.end());
 
     for (Edge e : edges)
     {
+        if(ccount <= w){
+            break;
+        }
         if (find_set(e.from) != find_set(e.to))
         {
             edgecount++;
-            cost += e.w;
-            result.push_back(e);
+            if(e.type == 0){
+                cost1 += e.w;
+            }
+            else{
+                cost2 += e.w;
+            }
+          //  result.push_back(e);
             union_sets(e.from, e.to);
         }
     }
-
-    if (edgecount != n - 1)
-    {
-        cout << "No MST!" << endl;
-    }
-    else
-    {
-        cout << "Total weights: " << cost << endl;
-        for (auto &var : result)
-        {
-            cout << var.from << " " << var.to << "\n";
-        }
-    }
+    cout << fixed <<setprecision(3) <<cost1 <<" "<< cost2 <<"\n";;
 }
 
 int main()
 {
-    kruskal();
+    ll tt;
+    cin >> tt;
+    for(int i = 1; i <= tt; i++){
+        cout << "Caso #"<<i<<": ";
+        kruskal();
+    }
+    
 }

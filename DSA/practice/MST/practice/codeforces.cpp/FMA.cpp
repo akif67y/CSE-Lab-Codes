@@ -49,6 +49,30 @@ void _print(ull t) { cerr << t; }
 
 #define M 100000007 // might need to change this;
 
+long long binarymulti(ll a, ll b);
+long long binaryexp(ll a, ll b) {
+  ll ans = 1;
+  while (b > 0) {
+    if (b & 1) {
+      ans = binarymulti(ans, a) % M;
+    }
+    a = binarymulti(a, a) % M;
+    b >>= 1;
+  }
+  return ans;
+}
+long long binarymulti(ll a, ll b) {
+  ll ans = 0;
+  while (b > 0) {
+    if (b & 1) {
+      ans = (ans + a) % M;
+    }
+    a = (a + a) % M; // prevents overflow of multiplying a and b, asuming 2a
+                     // doesn't cause overflow
+    b >>= 1;
+  }
+  return ans;
+}
 
 template <class T, class V> void _print(pair<T, V> p);
 template <class T> void _print(vector<T> v);
@@ -97,8 +121,6 @@ template <class T, class V> void _print(map<T, V> v) {
 // might need to change this;
 
 
-
-
  // adjacency matrix of graph
 //const int INF = 1000000000; // weight INF means there is no edge
 
@@ -107,19 +129,31 @@ struct Edge {
 };
 
 void prim() {
-  ll n;
-  cin >> n;
-  vector<vector<ll>> adj(n+1, vector<ll>(n+1,INF));
-  for(int i = 0; i < n; i++){
-    for(int j = 0; j < n; j++){
-      cin >> adj[i][j];
+  ll n,m;
+  cin >> n >> m;
+  vector<vector<ll>>adj(n+1,vector<ll>(n+1,INF));
+  vector<string>rows(n+1);
+  for(ll i = 0; i < n; i++){
+    string t;
+    cin >> t;
+    rows[i] = t;
+  }
+  for(ll i = 0; i < n; i++){
+    for(ll j = i+1; j < n; j++){
+        ll sm = -INF;
+        for(ll k = 0; k < m; k++){
+            sm = max(sm, (ll)abs(rows[i][k] - rows[j][k]));
+        }
+        adj[i][j] = sm;
+        adj[j][i] = sm;
     }
   }
-    ll total_weight = 0;
-    vector<bool> selected(n, false);
-    vector<Edge> min_e(n);
-    min_e[0].w = 0;
 
+    ll total_weight = 0;
+    vector<bool> selected(n+1, false);
+    vector<Edge> min_e(n+1);
+    min_e[0].w = 0;
+    ll maxedge = -INF;
     for (ll i=0; i<n; ++i) {
         ll v = -1;
         for (ll j = 0; j < n; ++j) {
@@ -128,14 +162,15 @@ void prim() {
         }
 
         if (min_e[v].w == INF) {
-            cout << "NO!" << endl;
-            return;
+            cout << "No MST!" << endl;
+            exit(0);
         }
 
         selected[v] = true;
         total_weight += min_e[v].w;
-        if (min_e[v].to != -1)
-            cout << v << " " << min_e[v].to << endl;
+        maxedge = max(maxedge, min_e[v].w);
+        // if (min_e[v].to != -1)
+        //     cout << v << " " << min_e[v].to << endl;
 
         for (ll to = 0; to < n; ++to) {
             if (adj[v][to] < min_e[to].w)
@@ -143,7 +178,7 @@ void prim() {
         }
     }
 
-    cout << total_weight << endl;
+    cout << maxedge << endl;
 }
 void solve() {
   

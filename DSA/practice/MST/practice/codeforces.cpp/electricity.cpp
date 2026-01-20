@@ -47,23 +47,23 @@ void _print(lld t) { cerr << t; }
 void _print(double t) { cerr << t; }
 void _print(ull t) { cerr << t; }
 
-vector<ll>parent(((ll)(2 * 1e5) + 1));
-vector<ll>sizet(((ll)(2 * 1e5) + 1));
+vector<ll>parent(((int)(2 * 1e5) + 1));
+vector<ll>sizet(((int)(2 * 1e5) + 1));
 
-void make_set(ll v)
+void make_set(int v)
 {
     parent[v] = v;
     sizet[v] = 1;
 }
 
-ll find_set(ll v)
+int find_set(int v)
 {
     if (v == parent[v])
         return v;
     return parent[v] = find_set(parent[v]);
 }
 
-void union_sets(ll a, ll b)
+void union_sets(int a, int b)
 {
     a = find_set(a);
     b = find_set(b);
@@ -79,8 +79,8 @@ void union_sets(ll a, ll b)
 class Edge
 {
 public:
-    ll w, to, from;
-    Edge(ll weight, ll target, ll source)
+    int w, to, from;
+    Edge(int weight, int target, int source)
     {
         w = weight;
         to = target;
@@ -98,22 +98,22 @@ public:
 
 void kruskal()
 {
-    ll n, m;
+    int n, m;
     cin >> n >> m;
     vector<Edge> edges;
-    for (ll i = 0; i < m; i++)
+    for (int i = 0; i < m; i++)
     {
-        ll u, v, w;
+        int u, v, w;
         cin >> u >> v >> w;
         edges.push_back({w, v, u});
         //  edges.push_back({w,u,v});
     }
 
-    ll cost = 0;
+    int cost = 0;
     vector<Edge> result;
-    for (ll i = 0; i <= n; i++)
+    for (int i = 0; i <= n; i++)
         make_set(i);
-    ll edgecount = 0;
+    int edgecount = 0;
 
     sort(edges.begin(), edges.end());
 

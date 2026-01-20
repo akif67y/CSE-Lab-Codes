@@ -125,10 +125,7 @@ void kruskal()
     for(ll i = 1; i <= n; i++){
         cin >> populations[i];
     }
-    for (ll i = 1; i <= n; i++){
-        make_set(i);
-        popul[i] = populations[i];
-    }
+    
         
 
     for (ll i = 1; i <= m; i++)
@@ -156,6 +153,10 @@ void kruskal()
         }
        
         q.pb({s,city,val});
+    }
+    for (ll i = 1; i <= n; i++){
+        make_set(i);
+        popul[i] = populations[i];
     }
     ll curmax = -INF;
     for(ll i = 1; i <= n; i++){
@@ -186,12 +187,11 @@ void kruskal()
         ll to = var2.to;
         from = find_set(from);
         to = find_set(to);
-        if(var2.status){
             if(from != to && popul[from] + popul[to] > curmax){
                 curmax = popul[from] + popul[to];
             }
             union_sets(from,to);
-        }
+        
         answer.pb(curmax);
         }
         else{

@@ -12,7 +12,7 @@ using namespace std;
   cout.tie(NULL)
 #define MOD 1000000007
 #define MOD1 998244353
-#define INF 1e18
+#define INF 1e9
 #define nline "\n"
 #define pb push_back
 #define ppb pop_back
@@ -115,10 +115,23 @@ void prim() {
       cin >> adj[i][j];
     }
   }
+   for(int i = 0; i < n; i++){
+    if(adj[i][i] != 0){
+        cout << "NO!" << endl;
+            return;
+    }
+    for(int j = 0; j < n; j++){
+       if(adj[i][j] != adj[j][i]){
+        cout << "NO!" << endl;
+            return;
+       }
+    }
+  }
     ll total_weight = 0;
     vector<bool> selected(n, false);
     vector<Edge> min_e(n);
     min_e[0].w = 0;
+    vector<pair<int,int>>graph[n+1];
 
     for (ll i=0; i<n; ++i) {
         ll v = -1;
@@ -134,16 +147,40 @@ void prim() {
 
         selected[v] = true;
         total_weight += min_e[v].w;
-        if (min_e[v].to != -1)
-            cout << v << " " << min_e[v].to << endl;
+        if (min_e[v].to != -1){
+            graph[v].push_back({min_e[v].w,min_e[v].to});
+        }
 
         for (ll to = 0; to < n; ++to) {
             if (adj[v][to] < min_e[to].w)
                 min_e[to] = {adj[v][to], v};
         }
     }
+    vector<int>distances(n+1,INF);
+    vector<int>visited(n+1,false);
+    queue<int>current_v;
+    current_v.push(0);
+    distances[0] = 0;
+    visited[0] = true;
+    while(!current_v.empty()){
+        int temp = current_v.front();
+        current_v.pop();
+        int distance = distances[temp];
+        for(auto &var : graph[temp]){
+            if(!visited[var.second]){
+                distances[var.second] = distance + var.first;
+                if(distances[var.second] != adj[0][var.second]){
+                     cout << "NO" << endl;
+                  return;
+                }
+                current_v.push(var.second);
+                visited[var.second] = true;
+            }
+        }
 
-    cout << total_weight << endl;
+    }
+    cout <<"YES\n";
+    
 }
 void solve() {
   
@@ -157,3 +194,9 @@ int main() {
   fastio();
     prim();
 }
+
+/*
+    Bfs e queue te push korte bhule gechi
+
+
+*/
