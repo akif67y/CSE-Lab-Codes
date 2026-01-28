@@ -99,7 +99,7 @@ ll bfs(int s, int t) {
 }
 
 
-ll maxflow(int s, int t, int n) {
+ll maxflow(int s, int t, int n,int boys) {
     ll flow = 0;
     ll new_flow;
 
@@ -120,12 +120,25 @@ ll maxflow(int s, int t, int n) {
             cur = parent_node[cur];
         }
     }
+    cout << flow << "\n";
+    for(int i = 0; i < sz(edges); i+= 2){
+        int from = edges[i].u;
+        int to = edges[i].v;
+        if(edges[i].flow == 1 && from <= boys && to > boys){
+            cout << from <<" "<< to-boys <<"\n";
+        }
+        
+    }
     return flow;
 }
 
 void solve() {
+    int boys,girls,pairc;
+    cin >> boys >> girls >> pairc;
+
     int n, m;
-    cin >> n >> m;
+    n = boys + girls + 3;
+    m = pairc;
     
    
     edges.clear();
@@ -134,22 +147,24 @@ void solve() {
 
     for (int i = 0; i < m; i++) {
         int u, v;
-        ll w;
-        cin >> u >> v >> w;
-        add_edge(u, v, w);
+        // u is the boy index and v is the girl index
+        
+        cin >> u >> v;
+        add_edge(u, v + boys, 1);
     }
 
-    int s, t;
-    cin >> s >> t;
+    int s = n-1, t = n-2;
+  //  cin >> s >> t;
+  for(int i = 1; i <= boys; i++){
+    add_edge(s,i,1);
+  }
+  for(int j = boys+1; j <= boys + girls; j++){
+    add_edge(j,t,1);
+  }
+  int ans = maxflow(s,t,n,boys);
+    
 
-    cout << maxflow(s, t, n) << "\n";
-
-  
-    for (int i = 0; i < m; i++) {
-        int id = 2 * i; 
-        cout << edges[id].u << " " << edges[id].v << " " 
-             << edges[id].flow << "/" << edges[id].cap << "\n";
-    }
+    
 }
 
 int main() {

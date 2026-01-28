@@ -123,36 +123,70 @@ ll maxflow(int s, int t, int n) {
     return flow;
 }
 
-void solve() {
-    int n, m;
-    cin >> n >> m;
-    
-   
+void solve(int t_case) {
+    int m_machines, w_wires;
+    cin >> m_machines >> w_wires;
+
+    // Clear previous graph
     edges.clear();
-    adj.assign(n + 1, vi());
+    // We need 2 nodes per machine: i and i+m_machines
+    adj.assign(2 * m_machines + 2, vi());
+
+    // 1. Read Machine Costs (Nodes 2 to M-1)
+    // The Boss (1) and Server (M) have INF capacity.
+    // The input gives M-2 integers for machines 2, 3 ... M-1
+    
+    // Boss (Node 1) cannot be destroyed -> INF capacity
+    add_edge(1, 1 + m_machines, INF); 
+
+    // Server (Node M) cannot be destroyed -> INF capacity
+    // Note: We handle this later in the loop or manually, 
+    // but the input loop below handles 2 to M-1.
+    
+    for (int i = 2; i < m_machines; i++) {
+        int cost;
+        cin >> cost;
+        // Internal edge for destroyable machine
+        add_edge(i, i + m_machines, cost);
+    }
+    
+    // Server (Node M)
+    add_edge(m_machines, m_machines + m_machines, INF);
 
 
-    for (int i = 0; i < m; i++) {
-        int u, v;
-        ll w;
-        cin >> u >> v >> w;
-        add_edge(u, v, w);
+    // 2. Read Wire Costs (Edges)
+    for (int i = 0; i < w_wires; i++) {
+        int u, v, cost;
+        cin >> u >> v >> cost;
+        
+        // Wires are bidirectional. 
+        // We connect u_out -> v_in AND v_out -> u_in
+        // u_out is (u + m_machines), v_in is (v)
+        
+        add_edge(u + m_machines, v, cost);
+        add_edge(v + m_machines, u, cost);
     }
 
-    int s, t;
-    cin >> s >> t;
+    // 3. Calculate Max Flow = Min Cut
+    // Source is Boss_in (1), Sink is Server_out (M + m_machines) or Server_in (M)
+    // Since capacity of M is INF, flow into M is same as flow out of M.
+    // Let's use 1 (start) and M + m (end of the server pipe) for clarity.
+    
+    int source = 1; 
+    int sink = 2 * m_machines; // The 'out' side of node M (M + M)
 
-    cout << maxflow(s, t, n) << "\n";
+    // Note: Pass the total number of nodes to your maxflow function
+    ll min_cost = maxflow(source, sink, 2 * m_machines + 1);
 
-  
-    for (int i = 0; i < m; i++) {
-        int id = 2 * i; 
-        cout << edges[id].u << " " << edges[id].v << " " 
-             << edges[id].flow << "/" << edges[id].cap << "\n";
-    }
+    cout << "Case " << t_case << ": " << min_cost << "\n";
 }
 
 int main() {
     fastio();
-    solve();
+    int tt;
+    cin >> tt;
+    while(tt--){
+        solve(tt);
+    }
 }
+

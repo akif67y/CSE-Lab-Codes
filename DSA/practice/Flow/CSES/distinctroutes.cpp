@@ -57,7 +57,8 @@ struct Edge {
 vector<Edge> edges;
 vector<vector<int>> adj;
 vector<int> parent_edge_index; 
-vector<int> parent_node;       
+vector<int> parent_node;   
+vector<int>edgevisitlist;    
 
 
 void add_edge(int u, int v, ll cap) {
@@ -98,6 +99,34 @@ ll bfs(int s, int t) {
     return 0;
 }
 
+// Modified DFS to find a single path in the flow graph
+// u: current node, t: target node (sink)
+// path: reference to vector to store the node sequence
+bool get_path(int u, int t, vector<int> &path) {
+    path.push_back(u); // 1. Add current node to path sequence
+
+    if (u == t) return true; // 2. Base case: Reached the sink
+
+    // 3. Iterate through edges
+    for (int id : adj[u]) {
+        // Check if edge has flow (part of solution) and hasn't been visited yet
+        if (edges[id].flow == 1 && edgevisitlist[id] == 0) {
+            
+            edgevisitlist[id] = 1; // 4. "Burn" the edge so it isn't used again
+            
+            if (get_path(edges[id].v, t, path)) {
+                return true; // Path found, bubble up success
+            }
+        }
+    }
+
+    path.pop_back(); // Backtrack if no valid path found from this node
+    return false;
+}
+
+   
+
+
 
 ll maxflow(int s, int t, int n) {
     ll flow = 0;
@@ -135,24 +164,43 @@ void solve() {
     for (int i = 0; i < m; i++) {
         int u, v;
         ll w;
-        cin >> u >> v >> w;
-        add_edge(u, v, w);
+        cin >> u >> v ;
+        add_edge(u, v, 1);
     }
 
-    int s, t;
-    cin >> s >> t;
+    int s = 1, t = n;
+ //   cin >> s >> t;
 
-    cout << maxflow(s, t, n) << "\n";
 
-  
-    for (int i = 0; i < m; i++) {
-        int id = 2 * i; 
-        cout << edges[id].u << " " << edges[id].v << " " 
-             << edges[id].flow << "/" << edges[id].cap << "\n";
+    ll k =  maxflow(s, t, n) ;
+    cout << k <<"\n";
+
+   fill(edgevisitlist.begin(), edgevisitlist.end(), 0);
+    edgevisitlist.resize(edges.size() + 1, 0);
+
+    // We know there are exactly 'k' paths
+    for (int i = 0; i < k; i++) {
+        vector<int> path; 
+        get_path(s, t, path); // Call the new function
+
+        // Print the path size
+        cout << path.size() << "\n";
+        
+        // Print path nodes
+        for (int j = 0; j < path.size(); j++) {
+            cout << path[j] << (j == path.size() - 1 ? "" : " ");
+        }
+        cout << "\n";
     }
+ 
 }
 
 int main() {
     fastio();
     solve();
 }
+
+/*
+mistakes : 
+    edgevisitlist[]= true update korinai
+*/

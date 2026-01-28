@@ -12,7 +12,7 @@ using namespace std;
   cout.tie(NULL)
 #define MOD 1000000007
 #define MOD1 998244353
-#define INF 1e18
+#define INF 1e9
 #define nline "\n"
 #define pb push_back
 #define ppb pop_back
@@ -123,36 +123,61 @@ ll maxflow(int s, int t, int n) {
     return flow;
 }
 
-void solve() {
-    int n, m;
-    cin >> n >> m;
-    
-   
+void solve(int tt) {
+    int n, m, b,d;
+    cin >> n;
+    vector<int>capacities(n+1);
+    for(int i =1 ; i <= n; i++){
+        cin >> capacities[i];
+    }
+    cin >> m;
     edges.clear();
-    adj.assign(n + 1, vi());
+    adj.assign(2 * n + 4, vi());
 
 
     for (int i = 0; i < m; i++) {
         int u, v;
         ll w;
         cin >> u >> v >> w;
-        add_edge(u, v, w);
+        add_edge(u+n, v, w);
+    }
+    for(int i = 1; i <= n; i++){
+        add_edge(i,i+n,capacities[i]);
+    }
+    cin >> b >> d;
+    int s, t;
+    s = 2 * n + 2;
+    t = 2 * n + 3;
+    vector<int>bs(b+1);
+    vector<int>ds(d+1);
+    for(int i = 1; i <= b; i++){
+        cin >> bs[i];
+    }
+    for(int i = 1; i <= d; i++){
+        cin >> ds[i];
     }
 
-    int s, t;
-    cin >> s >> t;
+    for(int i = 1; i <= b; i++){
+        add_edge(s,bs[i],INF);
+    }
+    for(int i = 1; i <= d; i++){
+        add_edge(ds[i]+ n,t, INF);
+    }
 
-    cout << maxflow(s, t, n) << "\n";
 
   
-    for (int i = 0; i < m; i++) {
-        int id = 2 * i; 
-        cout << edges[id].u << " " << edges[id].v << " " 
-             << edges[id].flow << "/" << edges[id].cap << "\n";
-    }
+
+    cout <<"Case "<< tt<<": " <<maxflow(s, t, 2*n+4) << "\n";
+
+  
+    
 }
 
 int main() {
     fastio();
-    solve();
+    int tt;
+    cin >> tt;
+    for(int t = 1; t <= tt; t++){
+        solve(t);
+    }
 }
