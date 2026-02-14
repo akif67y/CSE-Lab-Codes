@@ -1,6 +1,4 @@
 import java.util.*;
-
-// Node now holds a Key and a Value
 class Node<K extends Comparable<K>, V> {
     K key;
     V value;
@@ -19,26 +17,26 @@ public class AVLTree<K extends Comparable<K>, V> {
 
     private Node<K, V> root;
 
-    // Insert now takes a Key and a Value
+  
     public boolean insert(K key, V value) {
-        if (search(key)) return false; // Duplicate keys not allowed
+        if (search(key)) return false;
         root = insertRecursive(root, key, value);
         return true;
     }
 
-    // Delete is based on the Key
+   
     public boolean delete(K key) {
         if (!search(key)) return false;
         root = deleteRecursive(root, key);
         return true;
     }
 
-    // Search checks for the existence of a Key
+    
     public boolean search(K key) {
         return searchRecursive(root, key);
     }
     
-    // Helper to retrieve a value (typical dictionary/map behavior)
+  
     public V get(K key) {
         Node<K, V> node = getNodeRecursive(root, key);
         return (node != null) ? node.value : null;
@@ -54,11 +52,10 @@ public class AVLTree<K extends Comparable<K>, V> {
             case 3: postOrder(root, sb); break;
             case 4: levelOrder(root, sb); break;
         }
-
         return sb.toString().trim();
     }
 
-    // --- Recursive Helpers ---
+   
 
     private boolean searchRecursive(Node<K, V> node, K key) {
         if (node == null) return false;
@@ -77,7 +74,7 @@ public class AVLTree<K extends Comparable<K>, V> {
     }
 
     private Node<K, V> insertRecursive(Node<K, V> node, K key, V value) {
-        // 1. Perform standard BST insert
+        
         if (node == null) return new Node<>(key, value);
 
         int cmp = key.compareTo(node.key);
@@ -86,12 +83,8 @@ public class AVLTree<K extends Comparable<K>, V> {
         else if (cmp > 0)
             node.right = insertRecursive(node.right, key, value);
         else
-            return node; // Duplicate keys not allowed in this implementation
-
-        // 2. Update height
+            return node; 
         updateHeight(node);
-
-        // 3. Balance the node
         return balanceNode(node);
     }
 
@@ -104,7 +97,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         } else if (cmp > 0) {
             node.right = deleteRecursive(node.right, key);
         } else {
-            // Node with only one child or no child
+            
             if ((node.left == null) || (node.right == null)) {
                 Node<K, V> temp = (node.left != null) ? node.left : node.right;
                 if (temp == null) {
@@ -113,14 +106,9 @@ public class AVLTree<K extends Comparable<K>, V> {
                     node = temp;
                 }
             } else {
-                // Node with two children: Get inorder successor (smallest in right subtree)
                 Node<K, V> temp = minValueNode(node.right);
-                
-                // Copy the inorder successor's data to this node
                 node.key = temp.key;
-                node.value = temp.value; 
-
-                // Delete the inorder successor
+                node.value = temp.value;
                 node.right = deleteRecursive(node.right, temp.key);
             }
         }
@@ -133,8 +121,6 @@ public class AVLTree<K extends Comparable<K>, V> {
 
     private Node<K, V> balanceNode(Node<K, V> node) {
         int balance = getBalance(node);
-
-        // Left Heavy
         if (balance > 1) {
             if (getBalance(node.left) >= 0) {
                 return rightRotate(node);
@@ -143,8 +129,6 @@ public class AVLTree<K extends Comparable<K>, V> {
                 return rightRotate(node);
             }
         }
-
-        // Right Heavy
         if (balance < -1) {
             if (getBalance(node.right) <= 0) {
                 return leftRotate(node);
@@ -156,17 +140,11 @@ public class AVLTree<K extends Comparable<K>, V> {
         return node;
     }
 
-    // --- Rotations & Utilities ---
-
     private Node<K, V> rightRotate(Node<K, V> y) {
         Node<K, V> x = y.left;
         Node<K, V> T2 = x.right;
-
-        // Perform rotation
         x.right = y;
         y.left = T2;
-
-        // Update heights
         updateHeight(y);
         updateHeight(x);
 
@@ -176,12 +154,8 @@ public class AVLTree<K extends Comparable<K>, V> {
     private Node<K, V> leftRotate(Node<K, V> x) {
         Node<K, V> y = x.right;
         Node<K, V> T2 = y.left;
-
-        // Perform rotation
         y.left = x;
         x.right = T2;
-
-        // Update heights
         updateHeight(x);
         updateHeight(y);
 
@@ -207,7 +181,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         return current;
     }
 
-    // --- Traversals (Printing Key:Value) ---
+ 
 
     private void preOrder(Node<K, V> node, StringBuilder sb) {
         if (node != null) {
