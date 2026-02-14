@@ -3,7 +3,7 @@ import java.io.*;
 
 public class Main {
     public static void main(String[] args) {
-        AVLTree<Integer> tree = new AVLTree<>();
+        AVLTree<Integer,Integer> tree = new AVLTree<>();
         String inputFileName = "D:\\CSE-Lab-Codes\\DSA\\practice\\AVLTree\\offlineOnAvlTree\\src\\input.txt";
         String outputFileName = "D:\\CSE-Lab-Codes\\DSA\\practice\\AVLTree\\offlineOnAvlTree\\src\\output.txt";
 
@@ -31,7 +31,7 @@ public class Main {
                         break;
 
                     case 1:
-                        boolean inserted = tree.insert(value);
+                        boolean inserted = tree.insert(value,value);
                         bw.write("1 " + value + " " + (inserted ? "1" : "0"));
                         bw.newLine();
                         break;
